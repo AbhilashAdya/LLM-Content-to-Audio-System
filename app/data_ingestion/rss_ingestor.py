@@ -1,32 +1,11 @@
-from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
-
-RSS_SOURCES = [
-    {
-        "name": "VentureBeat AI",
-        "url": "https://venturebeat.com/category/ai/feed/",
-    },
-    {
-        "name": "MIT Technology Review AI",
-        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
-    },
-    {
-        "name": "Towards Data Science",
-        "url": "https://towardsdatascience.com/feed",
-    },
-]
-
-
-
 from typing import List, Optional
-from datetime import datetime
 
 import feedparser
 from dateutil import parser as date_parser
 
-from ..data_ingestion.schemas import Article
-
+from app.data_ingestion.schemas import Article
+from app.data_ingestion.rss_sources import RSS_SOURCES
 
 
 def parse_published_date(entry) -> Optional[datetime]:
@@ -51,7 +30,7 @@ def fetch_articles() -> List[Article]:
 
     for source in RSS_SOURCES:
         feed = feedparser.parse(source["url"])
-        #print(feed.entries)
+
         for entry in feed.entries:
             article = Article(
                 title=entry.get("title", "").strip(),
@@ -63,4 +42,3 @@ def fetch_articles() -> List[Article]:
             articles.append(article)
 
     return articles
-
