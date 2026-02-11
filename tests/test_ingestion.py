@@ -26,7 +26,7 @@ def test_article_recency_comparison():
         summary="Old summary",
         url="https://old.com",
         source="Test Source",
-        published_at= now - timedelta(days=1),
+        published_at=now - timedelta(days=1),
     )
 
     newer_article = Article(
@@ -39,6 +39,7 @@ def test_article_recency_comparison():
 
     assert newer_article.published_at > older_article.published_at
 
+
 def test_article_without_published_date():
     article = Article(
         title="No date",
@@ -49,4 +50,3 @@ def test_article_without_published_date():
     )
 
     assert article.published_at is None
-
