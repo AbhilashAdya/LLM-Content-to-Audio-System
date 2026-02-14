@@ -23,7 +23,6 @@ RSS_SOURCES = [
 ]
 
 
-
 def parse_published_date(entry) -> Optional[datetime]:
     """
     Parse the published date from an RSS entry.

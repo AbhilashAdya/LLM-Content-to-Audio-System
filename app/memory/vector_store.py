@@ -12,9 +12,7 @@ from app.data_ingestion.schemas import Article
 class VectorStore:
     def __init__(self):
         # Embedding model (can change later)
-        self.embedding_model = SentenceTransformer(
-            "all-MiniLM-L6-v2"
-        )
+        self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
         # Persistent Chroma client
         self.client = chromadb.Client(
@@ -38,14 +36,8 @@ class VectorStore:
     # -----------------------------
     @staticmethod
     def generate_article_id(article: Article) -> str:
-        unique_string = (
-            f"{article.title}|"
-            f"{article.url}|"
-            f"{article.published_at}"
-        )
-        return hashlib.sha256(
-            unique_string.encode()
-        ).hexdigest()
+        unique_string = f"{article.title}|" f"{article.url}|" f"{article.published_at}"
+        return hashlib.sha256(unique_string.encode()).hexdigest()
 
     # -----------------------------
     # ADD ARTICLES (RECENT)
@@ -61,22 +53,22 @@ class VectorStore:
             if self._exists(article_id):
                 continue
 
-            embedding = self.embedding_model.encode(
-                article.summary
-            ).tolist()
+            embedding = self.embedding_model.encode(article.summary).tolist()
 
             self.recent_collection.add(
                 ids=[article_id],
                 embeddings=[embedding],
                 documents=[article.summary],
-                metadatas=[{
-                    "title": article.title,
-                    "url": article.url,
-                    "source": article.source,
-                    "published_at": str(article.published_at),
-                    "timestamp_added": datetime.now(timezone.utc).isoformat(),
-                    "raw_text": article.summary,
-                }],
+                metadatas=[
+                    {
+                        "title": article.title,
+                        "url": article.url,
+                        "source": article.source,
+                        "published_at": str(article.published_at),
+                        "timestamp_added": datetime.now(timezone.utc).isoformat(),
+                        "raw_text": article.summary,
+                    }
+                ],
             )
 
     # -----------------------------
@@ -99,9 +91,7 @@ class VectorStore:
     # QUERY RECENT
     # -----------------------------
     def query_recent(self, query_text: str, top_k: int = 3):
-        query_embedding = self.embedding_model.encode(
-            query_text
-        ).tolist()
+        query_embedding = self.embedding_model.encode(query_text).tolist()
 
         return self.recent_collection.query(
             query_embeddings=[query_embedding],
@@ -112,9 +102,7 @@ class VectorStore:
     # QUERY IMPORTANT
     # -----------------------------
     def query_important(self, query_text: str, top_k: int = 3):
-        query_embedding = self.embedding_model.encode(
-            query_text
-        ).tolist()
+        query_embedding = self.embedding_model.encode(query_text).tolist()
 
         return self.important_collection.query(
             query_embeddings=[query_embedding],
