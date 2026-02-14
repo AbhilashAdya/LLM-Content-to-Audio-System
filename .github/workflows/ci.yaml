@@ -17,7 +17,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12.1'
+          python-version: "3.12.1"
 
       - name: Install dependencies
         run: |
@@ -25,14 +25,14 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Syntax & style check (flake8)
+      - name: Lint (flake8)
         run: |
           flake8 app
 
-      - name: Formatting check (black)
+      - name: Format check (black)
         run: |
           black --check app tests
 
-      - name: Run tests 
+      - name: Run tests
         run: |
-          pytest 
+          pytest

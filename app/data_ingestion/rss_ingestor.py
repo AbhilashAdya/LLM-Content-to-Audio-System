@@ -5,7 +5,23 @@ import feedparser
 from dateutil import parser as date_parser
 
 from app.data_ingestion.schemas import Article
-from app.data_ingestion.rss_sources import RSS_SOURCES
+
+
+RSS_SOURCES = [
+    {
+        "name": "VentureBeat AI",
+        "url": "https://venturebeat.com/category/ai/feed/",
+    },
+    {
+        "name": "MIT Technology Review AI",
+        "url": "https://www.technologyreview.com/topic/artificial-intelligence/feed/",
+    },
+    {
+        "name": "Towards Data Science",
+        "url": "https://towardsdatascience.com/feed",
+    },
+]
+
 
 
 def parse_published_date(entry) -> Optional[datetime]:
