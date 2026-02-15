@@ -6,7 +6,6 @@ from dateutil import parser as date_parser
 
 from app.data_ingestion.schemas import Article
 
-
 RSS_SOURCES = [
     {
         "name": "VentureBeat AI",
