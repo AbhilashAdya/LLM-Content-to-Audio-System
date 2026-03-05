@@ -36,8 +36,7 @@ class StoryStateStore:
 
     def init(self) -> None:
         with self._connect() as conn:
-            conn.execute(
-                """
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS story_state (
                     distinct_story_id TEXT PRIMARY KEY,
                     day_key TEXT NOT NULL,
@@ -48,16 +47,13 @@ class StoryStateStore:
                     heard_at TEXT,
                     important_at TEXT
                 )
-                """
-            )
-            conn.execute(
-                """
+                """)
+            conn.execute("""
                 CREATE TABLE IF NOT EXISTS settings (
                     key TEXT PRIMARY KEY,
                     value TEXT NOT NULL
                 )
-                """
-            )
+                """)
             # Default: notify once important count reaches the limit.
             conn.execute(
                 "INSERT OR IGNORE INTO settings(key, value) VALUES(?, ?)",

@@ -137,10 +137,14 @@ class CLIAssistant:
             return
 
         to_delete = min(n, current)
-        confirm = input(
-            f"This will delete the {to_delete} oldest important stories. "
-            "Continue? (yes/no): "
-        ).strip().lower()
+        confirm = (
+            input(
+                f"This will delete the {to_delete} oldest important stories. "
+                "Continue? (yes/no): "
+            )
+            .strip()
+            .lower()
+        )
 
         if confirm != "yes":
             print("OK. Keeping all important stories.")
@@ -307,9 +311,11 @@ You may expand slightly beyond the article if helpful.
     # ---------------------------------------
 
     def _confirm_stop(self):
-        confirm = input(
-            "Are you sure you want to end the session? (yes/no): "
-        ).strip().lower()
+        confirm = (
+            input("Are you sure you want to end the session? (yes/no): ")
+            .strip()
+            .lower()
+        )
 
         if confirm == "yes":
             self._mark_current_story_heard()

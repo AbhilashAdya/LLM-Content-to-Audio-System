@@ -645,6 +645,7 @@ class VectorStore:
         except Exception:
             return 0
         return len(distinct_story_ids)
+
     # -----------------------------
     # QUERY IMPORTANT
     # -----------------------------
