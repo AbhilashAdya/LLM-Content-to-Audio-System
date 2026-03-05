@@ -1,15 +1,16 @@
-import numpy as np
-from sklearn.cluster import KMeans
-from typing import Dict, List, Optional
-from sklearn.cluster import DBSCAN
 from datetime import datetime, timedelta, timezone
+from typing import List, Optional
+
+import numpy as np
+from sklearn.cluster import DBSCAN
+
 from app.memory.vector_store import VectorStore
 
 
 class RetrievalEngine:
     def __init__(self, vector_store: VectorStore):
         self.store = vector_store
-    
+
     @staticmethod
     def _cluster_distinct_stories(
         embeddings: np.ndarray,
@@ -25,7 +26,8 @@ class RetrievalEngine:
         clustering = DBSCAN(eps=eps, min_samples=min_samples, metric="cosine")
         labels = clustering.fit_predict(embeddings)
 
-        # Build clusters: each DBSCAN cluster label is a story; noise points (-1) are singletons.
+        # Build clusters: each DBSCAN cluster label is a story; noise points (-1)
+        # are singletons.
         clusters: List[List[int]] = []
         unique_labels = set(labels)
 
@@ -47,7 +49,8 @@ class RetrievalEngine:
             else:
                 cluster_embeddings = embeddings[indices]
 
-                # Centrality scoring using cosine similarity (normalize then dot-product).
+                # Centrality scoring using cosine similarity (normalize then
+                # dot-product).
                 norms = np.linalg.norm(cluster_embeddings, axis=1, keepdims=True)
                 norms = np.maximum(norms, 1e-12)
                 normed = cluster_embeddings / norms
@@ -122,7 +125,9 @@ class RetrievalEngine:
 
             member_ids = [ids[i] for i in indices if i < len(ids)]
             rep_id = ids[best_idx] if best_idx < len(ids) else None
-            rep_embedding = embeddings[best_idx].tolist() if best_idx < len(embeddings) else []
+            rep_embedding = (
+                embeddings[best_idx].tolist() if best_idx < len(embeddings) else []
+            )
 
             stories.append(
                 {
@@ -143,15 +148,20 @@ class RetrievalEngine:
         return stories
 
     def retrieve_distinct_stories(
-    self,
-    query: str,
-    dense_k: int = 20,
-    eps: float = 0.35,
-    min_samples: int = 2,
-):
+        self,
+        query: str,
+        dense_k: int = 20,
+        eps: float = 0.35,
+        min_samples: int = 2,
+    ):
         # Prefer cached representatives first for speed and stable IDs.
-        since_day_key = (datetime.now().astimezone().date() - timedelta(days=30)).strftime("%Y-%m-%d")
-        distinct = self.store.query_distinct(query_text=query, top_k=dense_k, since_day_key=since_day_key)
+        since_day = datetime.now().astimezone().date() - timedelta(days=30)
+        since_day_key = since_day.strftime("%Y-%m-%d")
+        distinct = self.store.query_distinct(
+            query_text=query,
+            top_k=dense_k,
+            since_day_key=since_day_key,
+        )
 
         if distinct.get("documents") and distinct["documents"][0]:
             ids = distinct.get("ids", [[]])[0]
@@ -188,9 +198,17 @@ class RetrievalEngine:
             day_keys.append(dt.astimezone().strftime("%Y-%m-%d"))
 
         for day_key in sorted(set(day_keys)):
-            self.retrieve_distinct_stories_for_day(day_key=day_key, eps=eps, min_samples=min_samples)
+            self.retrieve_distinct_stories_for_day(
+                day_key=day_key,
+                eps=eps,
+                min_samples=min_samples,
+            )
 
-        distinct2 = self.store.query_distinct(query_text=query, top_k=dense_k, since_day_key=since_day_key)
+        distinct2 = self.store.query_distinct(
+            query_text=query,
+            top_k=dense_k,
+            since_day_key=since_day_key,
+        )
         if distinct2.get("documents") and distinct2["documents"][0]:
             ids = distinct2.get("ids", [[]])[0]
             metadatas = distinct2.get("metadatas", [[]])[0]
@@ -250,7 +268,11 @@ class RetrievalEngine:
         start_of_day = now.replace(hour=0, minute=0, second=0, microsecond=0)
 
         day_key = start_of_day.strftime("%Y-%m-%d")
-        return self.retrieve_distinct_stories_for_day(day_key=day_key, eps=eps, min_samples=min_samples)
+        return self.retrieve_distinct_stories_for_day(
+            day_key=day_key,
+            eps=eps,
+            min_samples=min_samples,
+        )
 
     def retrieve_distinct_stories_for_day(
         self,
@@ -277,7 +299,11 @@ class RetrievalEngine:
         start = datetime(day.year, day.month, day.day, tzinfo=local_tz)
         end = start + timedelta(days=1)
 
-        raw = self.store.get_raw_articles(since=start, until=end, include_embeddings=True)
+        raw = self.store.get_raw_articles(
+            since=start,
+            until=end,
+            include_embeddings=True,
+        )
 
         raw_ids = raw.get("ids") or []
         raw_docs = raw.get("documents") or []
@@ -335,5 +361,3 @@ class RetrievalEngine:
             eps=eps,
             min_samples=min_samples,
         )
-
-    

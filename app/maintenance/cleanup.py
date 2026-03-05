@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import List, Dict, Set
+from typing import Set
 
 from app.memory.story_state_store import StoryStateStore
 from app.memory.vector_store import VectorStore
@@ -68,4 +68,3 @@ def cleanup_expired_story_data(
         raw_deleted=raw_deleted,
         state_deleted=state_deleted,
     )
-

@@ -40,7 +40,10 @@ def run_ingestion(
     # added = store.add_articles(articles)
     # print(f"Added {added} new articles to legacy recent cache.")
 
-    print(f"Cleaning up expired story data (heard>{heard_ttl_days}d, backlog>{backlog_ttl_days}d)...")
+    print(
+        "Cleaning up expired story data "
+        f"(heard>{heard_ttl_days}d, backlog>{backlog_ttl_days}d)..."
+    )
     state = StoryStateStore()
     result = cleanup_expired_story_data(
         store=store,
@@ -51,7 +54,9 @@ def run_ingestion(
     print(
         "Expired cleanup: "
         f"heard={result.expired_heard}, unheard={result.expired_unheard}, "
-        f"distinct_deleted={result.distinct_deleted}, raw_deleted={result.raw_deleted}, state_deleted={result.state_deleted}"
+        f"distinct_deleted={result.distinct_deleted}, "
+        f"raw_deleted={result.raw_deleted}, "
+        f"state_deleted={result.state_deleted}"
     )
 
     print("Database updated.\n")

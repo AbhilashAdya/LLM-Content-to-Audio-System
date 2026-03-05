@@ -41,7 +41,8 @@ class StoryStateStore:
                 CREATE TABLE IF NOT EXISTS story_state (
                     distinct_story_id TEXT PRIMARY KEY,
                     day_key TEXT NOT NULL,
-                    status TEXT NOT NULL CHECK (status IN ('unheard','heard','important')),
+                    status TEXT NOT NULL
+                        CHECK (status IN ('unheard','heard','important')),
                     first_seen_at TEXT,
                     last_presented_at TEXT,
                     heard_at TEXT,
@@ -193,7 +194,8 @@ class StoryStateStore:
         heard_cutoff = (now_utc - timedelta(days=heard_ttl_days)).isoformat()
 
         today_local = datetime.now().astimezone().date()
-        cutoff_day_key = (today_local - timedelta(days=backlog_ttl_days)).strftime("%Y-%m-%d")
+        cutoff_day = today_local - timedelta(days=backlog_ttl_days)
+        cutoff_day_key = cutoff_day.strftime("%Y-%m-%d")
 
         with self._connect() as conn:
             heard_rows = conn.execute(

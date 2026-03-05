@@ -5,7 +5,6 @@ import os
 from typing import List, Optional, Dict, Any
 
 import chromadb
-from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer
 
 from app.data_ingestion.schemas import Article
@@ -17,9 +16,7 @@ class VectorStore:
         self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 
         # Persistent Chroma client
-        self.client = chromadb.PersistentClient(
-    path="chroma_db"
-)
+        self.client = chromadb.PersistentClient(path="chroma_db")
         if not os.path.exists("chroma_db"):
             print("ChromaDB directory not created.")
         else:
@@ -41,8 +38,8 @@ class VectorStore:
 
         # Two collections: recent + important
         self.recent_collection = self.client.get_or_create_collection(
-        name="ai_news_recent",
-        metadata={"hnsw:space": "cosine"},
+            name="ai_news_recent",
+            metadata={"hnsw:space": "cosine"},
         )
 
         self.important_collection = self.client.get_or_create_collection(
@@ -53,7 +50,8 @@ class VectorStore:
     # -----------------------------
     # ID GENERATION
     # -----------------------------
-    @staticmethod # Does not depend on input state, it just transforms input → output
+    # Does not depend on input state; transforms input -> output.
+    @staticmethod
     def generate_article_id(article: Article) -> str:
         unique_string = f"{article.title}|" f"{article.url}|" f"{article.published_at}"
         return hashlib.sha256(unique_string.encode()).hexdigest()
@@ -146,10 +144,14 @@ class VectorStore:
     # -----------------------------
     # MOVE TO IMPORTANT
     # -----------------------------
-    def mark_as_important(self, article_id: str):       # Long-term memorey upgrade: move an article from recent to important collection by ID.
+    def mark_as_important(self, article_id: str) -> None:
+        """
+        Move an article from recent to the important collection by ID.
+        """
         result = self.recent_collection.get(ids=[article_id])
 
-        if not result["documents"]:    # No such article. Prevent error by checking existence first.
+        # No such article. Prevent error by checking existence first.
+        if not result["documents"]:
             return
 
         self.important_collection.add(
@@ -160,8 +162,8 @@ class VectorStore:
         )
 
     # -----------------------------
-# QUERY RECENT
-# -----------------------------
+    # QUERY RECENT
+    # -----------------------------
     def query_recent(self, query_text: str, top_k: int = 3):
         query_embedding = self.embedding_model.encode(query_text).tolist()
 
@@ -180,7 +182,12 @@ class VectorStore:
             include=["documents", "metadatas", "embeddings", "distances"],
         )
 
-    def query_distinct(self, query_text: str, top_k: int = 20, since_day_key: Optional[str] = None):
+    def query_distinct(
+        self,
+        query_text: str,
+        top_k: int = 20,
+        since_day_key: Optional[str] = None,
+    ):
         query_embedding = self.embedding_model.encode(query_text).tolist()
 
         where = None
@@ -216,8 +223,9 @@ class VectorStore:
         """
         Fetch all recent articles (not top_k) optionally filtered by timestamp_added.
 
-        `timestamp_added` is stored as an ISO-8601 string (UTC). We attempt a server-side
-        metadata filter first, then fall back to filtering in Python for compatibility.
+        `timestamp_added` is stored as an ISO-8601 string (UTC). We attempt a
+        server-side metadata filter first, then fall back to filtering in Python
+        for compatibility.
         """
 
         def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
@@ -290,7 +298,9 @@ class VectorStore:
         }
 
         if include_embeddings:
-            filtered["embeddings"] = [embeddings[i] for i in keep_indices] if embeddings else []
+            filtered["embeddings"] = (
+                [embeddings[i] for i in keep_indices] if embeddings else []
+            )
 
         return filtered
 
@@ -306,8 +316,9 @@ class VectorStore:
         """
         Fetch all raw-fetched articles optionally filtered by ingested_at.
 
-        `ingested_at` is stored as an ISO-8601 string (UTC). We attempt a server-side
-        metadata filter first, then fall back to filtering in Python for compatibility.
+        `ingested_at` is stored as an ISO-8601 string (UTC). We attempt a
+        server-side metadata filter first, then fall back to filtering in Python
+        for compatibility.
         """
 
         def _ensure_aware(dt: Optional[datetime]) -> Optional[datetime]:
@@ -375,7 +386,9 @@ class VectorStore:
         }
 
         if include_embeddings:
-            filtered["embeddings"] = [embeddings[i] for i in keep_indices] if embeddings else []
+            filtered["embeddings"] = (
+                [embeddings[i] for i in keep_indices] if embeddings else []
+            )
 
         return filtered
 
@@ -390,7 +403,10 @@ class VectorStore:
         ids_to_delete: List[str] = []
 
         try:
-            existing = self.distinct_collection.get(where={"day_key": day_key}, include=["ids"])
+            existing = self.distinct_collection.get(
+                where={"day_key": day_key},
+                include=["ids"],
+            )
             ids_to_delete = existing.get("ids") or []
         except Exception:
             existing = self.distinct_collection.get(include=["ids", "metadatas"])
@@ -425,8 +441,9 @@ class VectorStore:
         """
         existing_member_to_id: Dict[str, str] = {}
 
-        # If we're replacing, build a map from previous cluster members -> previous distinct_story_id
-        # so reclustering doesn't orphan story_state IDs (best-effort stability across runs).
+        # If we're replacing, build a map from previous cluster members -> previous
+        # distinct_story_id so reclustering doesn't orphan story_state IDs
+        # (best-effort stability across runs).
         if replace:
             try:
                 prev = self.distinct_collection.get(
@@ -460,7 +477,8 @@ class VectorStore:
             member_article_ids = story.get("member_article_ids") or []
 
             # Stable IDs across reclustering:
-            # - Prefer reusing the previous distinct_story_id if any member existed before.
+            # - Prefer reusing the previous distinct_story_id if any member existed
+            #   before.
             # - Otherwise, derive a new ID from (day_key, rep_article_id).
             reused_id = None
             for member_id in sorted(member_article_ids):
@@ -477,18 +495,26 @@ class VectorStore:
             rep_metadata = story.get("metadata") or {}
             rep_source = rep_metadata.get("source") or ""
             sources = sorted({rep_source} | set(story.get("sources") or []))
+            cluster_size = int(
+                story.get("cluster_size") or len(member_article_ids) or 1
+            )
+            rep_ingested_at = (
+                rep_metadata.get("ingested_at")
+                or rep_metadata.get("timestamp_added")
+                or ""
+            )
 
             metadata: Dict[str, Any] = {
                 "day_key": day_key,
                 "rep_article_id": rep_article_id,
-                "cluster_size": int(story.get("cluster_size") or len(member_article_ids) or 1),
+                "cluster_size": cluster_size,
                 "member_article_ids_json": json.dumps(member_article_ids),
                 "headline": story.get("headline") or rep_metadata.get("title") or "",
                 "sources_csv": ",".join([s for s in sources if s]),
                 "rep_url": rep_metadata.get("url") or "",
                 "rep_source": rep_source,
                 "rep_published_at": rep_metadata.get("published_at") or "",
-                "rep_ingested_at": rep_metadata.get("ingested_at") or rep_metadata.get("timestamp_added") or "",
+                "rep_ingested_at": rep_ingested_at,
                 "created_at": created_at,
             }
 
@@ -546,9 +572,14 @@ class VectorStore:
             if (metadata or {}).get("day_key") != day_key:
                 continue
 
+            headline = (
+                (metadata or {}).get("headline")
+                or (metadata or {}).get("rep_title")
+                or ""
+            )
             stories.append(
                 {
-                    "headline": (metadata or {}).get("headline") or (metadata or {}).get("rep_title") or "",
+                    "headline": headline,
                     "document": documents[idx] if idx < len(documents) else "",
                     "metadata": metadata,
                     "cluster_size": int((metadata or {}).get("cluster_size") or 1),
@@ -567,7 +598,8 @@ class VectorStore:
         self, distinct_story_ids: List[str]
     ) -> Dict[str, List[str]]:
         """
-        Returns a map of distinct_story_id -> member_article_ids (may be empty if not found).
+        Returns a map of distinct_story_id -> member_article_ids (may be empty if
+        not found).
         """
         if not distinct_story_ids:
             return {}
@@ -613,11 +645,10 @@ class VectorStore:
         except Exception:
             return 0
         return len(distinct_story_ids)
+    # -----------------------------
+    # QUERY IMPORTANT
+    # -----------------------------
 
-
-# -----------------------------
-# QUERY IMPORTANT
-# -----------------------------
     def query_important(self, query_text: str, top_k: int = 3):
         query_embedding = self.embedding_model.encode(query_text).tolist()
 

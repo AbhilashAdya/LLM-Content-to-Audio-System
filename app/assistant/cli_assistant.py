@@ -29,7 +29,10 @@ class CLIAssistant:
 
         notify = self.state.get_important_notify_status(limit=20)
         if notify.should_notify:
-            print(f"Note: important stories count is {notify.current_count} (limit {notify.limit}).")
+            print(
+                f"Note: important stories count is {notify.current_count} "
+                f"(limit {notify.limit})."
+            )
             print("Important deletion UI is not implemented yet.")
             self.state.ack_important_notification(notify.current_count, step=15)
 
@@ -53,18 +56,25 @@ class CLIAssistant:
 
         day_key = None
         if "yesterday" in normalized:
-            day_key = (datetime.now().astimezone() - timedelta(days=1)).strftime("%Y-%m-%d")
+            yesterday = datetime.now().astimezone() - timedelta(days=1)
+            day_key = yesterday.strftime("%Y-%m-%d")
         else:
             m = re.search(r"\b(\d{4}-\d{2}-\d{2})\b", normalized)
             if m:
                 day_key = m.group(1)
 
+        is_today_request = (
+            not normalized
+            or "today" in normalized
+            or normalized in {"latest", "update", "ai update"}
+        )
+
         if day_key is not None:
             stories = self.engine.retrieve_distinct_stories_for_day(day_key=day_key)
-        # Default "today" flow: fetch all recent articles for today and deduplicate via clustering.
-        elif not normalized or "today" in normalized or normalized in {"latest", "update", "ai update"}:
+        # Default "today" flow: fetch recent articles.
+        # Deduplicate via clustering.
+        elif is_today_request:
             stories = self.engine.retrieve_distinct_stories_today()
-        # Default "today" flow: fetch all recent articles for today and deduplicate via clustering.
         else:
             stories = self.engine.retrieve_distinct_stories(query=user_query)
 
@@ -74,10 +84,12 @@ class CLIAssistant:
 
         if day_key is not None:
             print(f"\nThere are {len(stories)} distinct AI stories for {day_key}.")
-        elif not normalized or "today" in normalized or normalized in {"latest", "update", "ai update"}:
+        elif is_today_request:
             print(f"\nThere are {len(stories)} distinct AI stories today.")
         else:
-            print(f"\nThere are {len(stories)} distinct AI stories matching your request.")
+            print(
+                f"\nThere are {len(stories)} distinct AI stories matching your request."
+            )
         print("Starting with the first one.")
 
         self.stories = stories
@@ -126,7 +138,8 @@ class CLIAssistant:
 
         to_delete = min(n, current)
         confirm = input(
-            f"This will delete the {to_delete} oldest important stories. Continue? (yes/no): "
+            f"This will delete the {to_delete} oldest important stories. "
+            "Continue? (yes/no): "
         ).strip().lower()
 
         if confirm != "yes":
@@ -279,8 +292,14 @@ You may expand slightly beyond the article if helpful.
 
         notify = self.state.get_important_notify_status(limit=20)
         if notify.should_notify:
-            print(f"Note: important stories count is {notify.current_count} (limit {notify.limit}).")
-            print("You can keep adding; you'll be notified again after 15 more are added.")
+            print(
+                f"Note: important stories count is {notify.current_count} "
+                f"(limit {notify.limit})."
+            )
+            print(
+                "You can keep adding; you'll be notified again "
+                "after 15 more are added."
+            )
             self.state.ack_important_notification(notify.current_count, step=15)
 
     # ---------------------------------------
@@ -288,7 +307,9 @@ You may expand slightly beyond the article if helpful.
     # ---------------------------------------
 
     def _confirm_stop(self):
-        confirm = input("Are you sure you want to end the session? (yes/no): ").strip().lower()
+        confirm = input(
+            "Are you sure you want to end the session? (yes/no): "
+        ).strip().lower()
 
         if confirm == "yes":
             self._mark_current_story_heard()

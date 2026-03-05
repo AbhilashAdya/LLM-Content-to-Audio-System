@@ -1,5 +1,5 @@
-from datetime import datetime
-from typing import List, Optional
+from typing import List
+
 import html2text
 import feedparser
 from dateutil import parser as date_parser
@@ -34,6 +34,7 @@ def parse_published_date(entry):
             return None
     return None
 
+
 def fetch_articles() -> List[Article]:
     """
     Fetch articles from all configured RSS sources
@@ -56,8 +57,6 @@ def fetch_articles() -> List[Article]:
                 published_at=parse_published_date(entry),
             )
             articles.append(article)
-        #print(articles[0])
+        # print(articles[0])
 
     return articles
-
-   
