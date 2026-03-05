@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-
+import html2text
 import feedparser
 from dateutil import parser as date_parser
 
@@ -22,7 +22,7 @@ RSS_SOURCES = [
 ]
 
 
-def parse_published_date(entry) -> Optional[datetime]:
+def parse_published_date(entry):
     """
     Parse the published date from an RSS entry.
     Returns None if unavailable or unparsable.
@@ -34,25 +34,30 @@ def parse_published_date(entry) -> Optional[datetime]:
             return None
     return None
 
-
 def fetch_articles() -> List[Article]:
     """
     Fetch articles from all configured RSS sources
     and normalize them into Article objects.
     """
     articles: List[Article] = []
+    h = html2text.HTML2Text()
+    h.ignore_links = True  # Ignore converting links to Markdown format
 
     for source in RSS_SOURCES:
         feed = feedparser.parse(source["url"])
 
         for entry in feed.entries:
+            summary_text = h.handle(entry.get("summary", "")).strip()
             article = Article(
                 title=entry.get("title", "").strip(),
-                summary=entry.get("summary", "").strip(),
+                summary=summary_text,
                 url=entry.get("link", ""),
                 source=source["name"],
                 published_at=parse_published_date(entry),
             )
             articles.append(article)
+        #print(articles[0])
 
     return articles
+
+   
