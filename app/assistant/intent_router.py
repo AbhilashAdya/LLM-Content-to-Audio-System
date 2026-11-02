@@ -48,17 +48,17 @@ Rules:
 - Return ONLY one action name from the available list.
 - Do NOT explain your reasoning.
 - Do NOT output anything except the action word.
-- If unsure, return "casual_conversation".
+- If unsure, notify the user that the action is not allowed and return "casual_conversation".
 """
 
         try:
             response = self.llm.generate(prompt).strip().lower()
         except Exception:
             # Fallback if API fails
-            return "casual_conversation"
+            return "API call failed, defaulting to casual_conversation"
 
         # Safety check: enforce strict action list
         if response in self.allowed_actions:
             return response
 
-        return "casual_conversation"
+        return "response not allowed, defaulting to casual_conversation"

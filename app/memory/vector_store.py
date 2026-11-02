@@ -1,4 +1,4 @@
-import json
+﻿import json
 import hashlib
 from datetime import datetime, timedelta, timezone
 import os
@@ -238,7 +238,7 @@ class VectorStore:
         since = _ensure_aware(since)
         until = _ensure_aware(until)
 
-        include = ["ids", "documents", "metadatas"]
+        include = ["documents", "metadatas"]
         if include_embeddings:
             include.append("embeddings")
 
@@ -272,6 +272,9 @@ class VectorStore:
         metadatas = results.get("metadatas") or []
         documents = results.get("documents") or []
         embeddings = results.get("embeddings") if include_embeddings else None
+
+        if include_embeddings and embeddings is not None and hasattr(embeddings, "tolist"):
+            embeddings = embeddings.tolist()
 
         keep_indices: List[int] = []
         for idx, metadata in enumerate(metadatas):
@@ -331,7 +334,7 @@ class VectorStore:
         since = _ensure_aware(since)
         until = _ensure_aware(until)
 
-        include = ["ids", "documents", "metadatas"]
+        include = ["documents", "metadatas"]
         if include_embeddings:
             include.append("embeddings")
 
@@ -360,6 +363,9 @@ class VectorStore:
         metadatas = results.get("metadatas") or []
         documents = results.get("documents") or []
         embeddings = results.get("embeddings") if include_embeddings else None
+
+        if include_embeddings and embeddings is not None and hasattr(embeddings, "tolist"):
+            embeddings = embeddings.tolist()
 
         keep_indices: List[int] = []
         for idx, metadata in enumerate(metadatas):
@@ -405,11 +411,11 @@ class VectorStore:
         try:
             existing = self.distinct_collection.get(
                 where={"day_key": day_key},
-                include=["ids"],
+                include=[],
             )
             ids_to_delete = existing.get("ids") or []
         except Exception:
-            existing = self.distinct_collection.get(include=["ids", "metadatas"])
+            existing = self.distinct_collection.get(include=["metadatas"])
             ids = existing.get("ids") or []
             metadatas = existing.get("metadatas") or []
             for idx, metadata in enumerate(metadatas):
@@ -448,7 +454,7 @@ class VectorStore:
             try:
                 prev = self.distinct_collection.get(
                     where={"day_key": day_key},
-                    include=["ids", "metadatas"],
+                    include=["metadatas"],
                 )
                 prev_ids = prev.get("ids") or []
                 prev_metas = prev.get("metadatas") or []
@@ -665,7 +671,7 @@ class VectorStore:
     def cleanup_expired(self, days: int = 15) -> int:
         cutoff = datetime.now(timezone.utc) - timedelta(days=days)
 
-        results = self.recent_collection.get(include=["ids", "metadatas"])
+        results = self.recent_collection.get(include=["metadatas"])
 
         ids_to_delete = []
 
@@ -693,3 +699,7 @@ class VectorStore:
     def _exists(self, article_id: str) -> bool:
         result = self.recent_collection.get(ids=[article_id])
         return bool(result["ids"])
+
+
+
+
