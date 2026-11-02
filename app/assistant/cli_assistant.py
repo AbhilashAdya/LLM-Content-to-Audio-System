@@ -6,7 +6,7 @@ import re
 from datetime import datetime, timedelta
 from app.voice.voice_handler import VoiceHandler
 
-    
+
 class CLIAssistant:
     def __init__(self, store):
         self.store = store
@@ -29,7 +29,11 @@ class CLIAssistant:
         return len(text) >= 40
 
     def _sanitize_story_list(self, stories):
-        return [story for story in (stories or []) if self._has_usable_story_text(story)]
+        return [
+            story
+            for story in (stories or [])
+            if self._has_usable_story_text(story)
+        ]
 
     # ---------------------------------------
     # ENTRY
@@ -509,7 +513,10 @@ User says:
 
         if (
             "session" in normalized
-            and any(word in normalized for word in ("end", "and", "stop", "close", "quit", "finish"))
+            and any(
+                word in normalized
+                for word in ("end", "and", "stop", "close", "quit", "finish")
+            )
         ) or normalized in {"stop", "end", "quit"}:
             self._confirm_stop()
             return True
@@ -529,7 +536,8 @@ User says:
         to_delete = min(n, current)
         confirm = (
             self.voice_handler.listen(
-                f"This will delete the {to_delete} oldest important stories. Continue? Please say yes or no."
+                f"This will delete the {to_delete} oldest important stories. "
+                "Continue? Please say yes or no."
             )
             .strip()
             .lower()
@@ -727,4 +735,3 @@ You may expand slightly beyond the article if helpful.
         distinct_id = (self.current_story or {}).get("distinct_story_id")
         if distinct_id:
             self.state.mark_heard(distinct_id)
-

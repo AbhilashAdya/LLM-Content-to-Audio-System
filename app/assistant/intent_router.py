@@ -48,7 +48,8 @@ Rules:
 - Return ONLY one action name from the available list.
 - Do NOT explain your reasoning.
 - Do NOT output anything except the action word.
-- If unsure, notify the user that the action is not allowed and return "casual_conversation".
+- If unsure, notify the user that the action is not allowed and return
+    "casual_conversation".
 """
 
         try:

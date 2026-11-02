@@ -1,4 +1,4 @@
-﻿import json
+import json
 import hashlib
 from datetime import datetime, timedelta, timezone
 import os
@@ -273,7 +273,11 @@ class VectorStore:
         documents = results.get("documents") or []
         embeddings = results.get("embeddings") if include_embeddings else None
 
-        if include_embeddings and embeddings is not None and hasattr(embeddings, "tolist"):
+        if (
+            include_embeddings
+            and embeddings is not None
+            and hasattr(embeddings, "tolist")
+        ):
             embeddings = embeddings.tolist()
 
         keep_indices: List[int] = []
@@ -364,7 +368,11 @@ class VectorStore:
         documents = results.get("documents") or []
         embeddings = results.get("embeddings") if include_embeddings else None
 
-        if include_embeddings and embeddings is not None and hasattr(embeddings, "tolist"):
+        if (
+            include_embeddings
+            and embeddings is not None
+            and hasattr(embeddings, "tolist")
+        ):
             embeddings = embeddings.tolist()
 
         keep_indices: List[int] = []
@@ -699,7 +707,3 @@ class VectorStore:
     def _exists(self, article_id: str) -> bool:
         result = self.recent_collection.get(ids=[article_id])
         return bool(result["ids"])
-
-
-
-

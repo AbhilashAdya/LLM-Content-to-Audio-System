@@ -128,9 +128,9 @@ def _get_day_data(
         if cached_ids:
             store.delete_distinct_stories_by_ids([str(i) for i in cached_ids])
             print(
-                f"Rebuild cache: deleted {len(cached_ids)} cached distinct stories for {day_key}."
+                f"Rebuild cache: deleted {len(cached_ids)} cached distinct stories "
+                f"for {day_key}."
             )
-
 
     distinct_stories = _get_distinct_stories_for_day(
         engine=engine,
@@ -150,7 +150,9 @@ def compute_compression_rate(*, raw_count: int, distinct_count: int) -> float:
     return float(distinct_count / raw_count)
 
 
-def compute_noise_rate(*, raw_count: int, distinct_stories: List[Dict[str, Any]]) -> float:
+def compute_noise_rate(
+    *, raw_count: int, distinct_stories: List[Dict[str, Any]]
+) -> float:
     """Compute noise rate (singleton share) = singleton_count / raw_count.
 
     With DBSCAN(min_samples=2), singleton distinct stories correspond to DBSCAN
@@ -356,7 +358,6 @@ def run_eval(
     }
 
 
-
 def _missing_dependency_message(exc: ModuleNotFoundError) -> str:
     missing = getattr(exc, "name", None) or "(unknown module)"
 
@@ -375,14 +376,22 @@ def _missing_dependency_message(exc: ModuleNotFoundError) -> str:
         f"Interpreter used: {sys.executable}",
         "",
         "Fix (recommended): in VS Code select the project interpreter:",
-        (f"  - Python: Select Interpreter -> {venv_hint}" if venv_hint else "  - Python: Select Interpreter -> .venv"),
+        (
+            f"  - Python: Select Interpreter -> {venv_hint}"
+            if venv_hint
+            else "  - Python: Select Interpreter -> .venv"
+        ),
         "",
         "If you're using the Code Runner extension, it may run the system Python.",
         "Configure it to use the `.venv` interpreter (or enable 'Run In Terminal').",
         "",
-        "If the package is genuinely missing from your environment, install deps from `requirements.txt`.",
+        (
+            "If the package is genuinely missing from your environment, install "
+            "deps from `requirements.txt`."
+        ),
     ]
     return "\n".join(lines)
+
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     """Entrypoint: runnable via Run/F5 (defaults) or as a CLI with flags."""
@@ -440,5 +449,3 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
-

@@ -20,7 +20,7 @@ class VoiceHandler:
     ):
         """
         Initialize voice handler with Whisper for STT and edge-tts for TTS.
-        
+
         Args:
             whisper_model: "tiny", "base", "small", "medium", or "large"
             listen_timeout: Seconds to wait for speech to start.
@@ -49,7 +49,8 @@ class VoiceHandler:
             "while (-not $player.NaturalDuration.HasTimeSpan -and $attempts -lt 200) "
             "{ Start-Sleep -Milliseconds 50; $attempts++ }; "
             "if ($player.NaturalDuration.HasTimeSpan) "
-            "{ Start-Sleep -Milliseconds ([int]$player.NaturalDuration.TimeSpan.TotalMilliseconds + 100) } "
+            "{ Start-Sleep -Milliseconds "
+            "([int]$player.NaturalDuration.TimeSpan.TotalMilliseconds + 100) } "
             "else { Start-Sleep -Seconds 2 }; "
             "$player.Stop(); "
             "$player.Close();"
@@ -114,7 +115,7 @@ class VoiceHandler:
                         else phrase_time_limit
                     ),
                 )
-            
+
             whisper_audio = self._audio_data_to_whisper_input(audio)
             result = self.whisper_model.transcribe(
                 whisper_audio,
@@ -125,7 +126,7 @@ class VoiceHandler:
                 best_of=5,
             )
             recognized_text = result["text"].strip()
-            
+
             print(f"[You said: {recognized_text}]")
             return recognized_text
 

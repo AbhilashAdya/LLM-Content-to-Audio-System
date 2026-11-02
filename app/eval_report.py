@@ -29,8 +29,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-import numpy as np
-
 
 def _ensure_project_root_on_syspath() -> None:
     project_root = Path(__file__).resolve().parents[1]
@@ -94,14 +92,17 @@ def _svg_bar_chart(
     parts: List[str] = []
     parts.append(f'<svg viewBox="0 0 {width} {height}" role="img">')
     parts.append(
-        f'<text x="{margin_l}" y="{margin_t - 10}" font-size="14" font-weight="600">{html.escape(title)}</text>'
+        f'<text x="{margin_l}" y="{margin_t - 10}" font-size="14" '
+        f'font-weight="600">{html.escape(title)}</text>'
     )
 
     parts.append(
-        f'<line x1="{margin_l}" y1="{margin_t + plot_h}" x2="{margin_l + plot_w}" y2="{margin_t + plot_h}" stroke="#999"/>'
+        f'<line x1="{margin_l}" y1="{margin_t + plot_h}" '
+        f'x2="{margin_l + plot_w}" y2="{margin_t + plot_h}" stroke="#999"/>'
     )
     parts.append(
-        f'<line x1="{margin_l}" y1="{margin_t}" x2="{margin_l}" y2="{margin_t + plot_h}" stroke="#999"/>'
+        f'<line x1="{margin_l}" y1="{margin_t}" x2="{margin_l}" '
+        f'y2="{margin_t + plot_h}" stroke="#999"/>'
     )
 
     for i, (lab, v) in enumerate(zip(labels, values)):
@@ -109,13 +110,17 @@ def _svg_bar_chart(
         top = y(v)
         h = (margin_t + plot_h) - top
         parts.append(
-            f'<rect x="{left}" y="{top}" width="{bar_w}" height="{h}" fill="{bar_color}" rx="3"/>'
+            f'<rect x="{left}" y="{top}" width="{bar_w}" '
+            f'height="{h}" fill="{bar_color}" rx="3"/>'
         )
         parts.append(
-            f'<text x="{left + bar_w / 2}" y="{top - 6}" text-anchor="middle" font-size="12" fill="#333">{int(v)}</text>'
+            f'<text x="{left + bar_w / 2}" y="{top - 6}" '
+            f'text-anchor="middle" font-size="12" fill="#333">{int(v)}</text>'
         )
         parts.append(
-            f'<text x="{left + bar_w / 2}" y="{margin_t + plot_h + 18}" text-anchor="middle" font-size="12" fill="#333">{html.escape(lab)}</text>'
+            f'<text x="{left + bar_w / 2}" y="{margin_t + plot_h + 18}" '
+            f'text-anchor="middle" font-size="12" fill="#333">'
+            f'{html.escape(lab)}</text>'
         )
 
     parts.append("</svg>")
@@ -141,7 +146,8 @@ def _svg_stacked_bar(
     parts: List[str] = []
     parts.append(f'<svg viewBox="0 0 {width} {height}" role="img">')
     parts.append(
-        f'<text x="32" y="20" font-size="14" font-weight="600">{html.escape(title)}</text>'
+        f'<text x="32" y="20" font-size="14" font-weight="600">'
+        f'{html.escape(title)}</text>'
     )
 
     x = 32
@@ -151,17 +157,20 @@ def _svg_stacked_bar(
         f'<rect x="{x}" y="{y}" width="{a_w}" height="{h}" fill="{a_color}" rx="3"/>'
     )
     parts.append(
-        f'<rect x="{x + a_w}" y="{y}" width="{b_w}" height="{h}" fill="{b_color}" rx="3"/>'
+        f'<rect x="{x + a_w}" y="{y}" width="{b_w}" '
+        f'height="{h}" fill="{b_color}" rx="3"/>'
     )
 
     a_pct = 100.0 * (a_value / total)
     b_pct = 100.0 * (b_value / total)
 
     parts.append(
-        f'<text x="{x}" y="{y + 56}" font-size="12" fill="#333">{html.escape(a_label)}: {a_value} ({a_pct:.1f}%)</text>'
+        f'<text x="{x}" y="{y + 56}" font-size="12" fill="#333">'
+        f'{html.escape(a_label)}: {a_value} ({a_pct:.1f}%)</text>'
     )
     parts.append(
-        f'<text x="{x}" y="{y + 76}" font-size="12" fill="#333">{html.escape(b_label)}: {b_value} ({b_pct:.1f}%)</text>'
+        f'<text x="{x}" y="{y + 76}" font-size="12" fill="#333">'
+        f'{html.escape(b_label)}: {b_value} ({b_pct:.1f}%)</text>'
     )
 
     parts.append("</svg>")
@@ -223,20 +232,32 @@ def _svg_line_chart(
     parts: List[str] = []
     parts.append(f'<svg viewBox="0 0 {width} {height}" role="img">')
     parts.append(
-        f'<text x="{margin_l}" y="{margin_t - 10}" font-size="14" font-weight="600">{html.escape(title)}</text>'
+        f'<text x="{margin_l}" y="{margin_t - 10}" font-size="14" '
+        f'font-weight="600">{html.escape(title)}</text>'
     )
 
     parts.append(
-        f'<line x1="{margin_l}" y1="{margin_t + plot_h}" x2="{margin_l + plot_w}" y2="{margin_t + plot_h}" stroke="#999"/>'
+        f'<line x1="{margin_l}" y1="{margin_t + plot_h}" '
+        f'x2="{margin_l + plot_w}" y2="{margin_t + plot_h}" stroke="#999"/>'
     )
     parts.append(
-        f'<line x1="{margin_l}" y1="{margin_t}" x2="{margin_l}" y2="{margin_t + plot_h}" stroke="#999"/>'
+        f'<line x1="{margin_l}" y1="{margin_t}" x2="{margin_l}" '
+        f'y2="{margin_t + plot_h}" stroke="#999"/>'
     )
 
-    parts.append(f'<text x="{margin_l}" y="{height - 10}" font-size="12" fill="#333">eps</text>')
-    parts.append(f'<text x="8" y="{margin_t + 10}" font-size="12" fill="#333">{html.escape(y_label)}</text>')
+    parts.append(
+        f'<text x="{margin_l}" y="{height - 10}" font-size="12" '
+        'fill="#333">eps</text>'
+    )
+    parts.append(
+        f'<text x="8" y="{margin_t + 10}" font-size="12" fill="#333">'
+        f'{html.escape(y_label)}</text>'
+    )
 
-    parts.append(f'<polyline points="{points}" fill="none" stroke="{color}" stroke-width="2"/>')
+    parts.append(
+        f'<polyline points="{points}" fill="none" stroke="{color}" '
+        'stroke-width="2"/>'
+    )
     for a, b in zip(xs, ys):
         parts.append(f'<circle cx="{x(a)}" cy="{y(b)}" r="3" fill="{color}"/>')
 
@@ -281,10 +302,16 @@ def compute_day_metrics(
     )
 
     distinct_count = len(distinct_stories)
-    compression = compute_compression_rate(raw_count=raw_count, distinct_count=distinct_count)
-    noise_rate = compute_noise_rate(raw_count=raw_count, distinct_stories=distinct_stories)
+    compression = compute_compression_rate(
+        raw_count=raw_count, distinct_count=distinct_count
+    )
+    noise_rate = compute_noise_rate(
+        raw_count=raw_count, distinct_stories=distinct_stories
+    )
     cluster_stats = compute_cluster_size_stats(distinct_stories=distinct_stories)
-    cohesion = compute_within_cluster_similarity(store=store, distinct_stories=distinct_stories)
+    cohesion = compute_within_cluster_similarity(
+        store=store, distinct_stories=distinct_stories
+    )
 
     cluster_sizes = [_safe_int(s.get("cluster_size") or 1, 1) for s in distinct_stories]
     singleton_count = sum(1 for s in cluster_sizes if s == 1)
@@ -380,7 +407,9 @@ def write_graphs(
     if sweep:
         xs = [float(r["eps"]) for r in sweep]
 
-        outputs["eps_sweep_distinct_count"] = report_dir / "eps_sweep_distinct_count.svg"
+        outputs["eps_sweep_distinct_count"] = (
+            report_dir / "eps_sweep_distinct_count.svg"
+        )
         _write_text(
             outputs["eps_sweep_distinct_count"],
             _svg_line_chart(
@@ -404,7 +433,9 @@ def write_graphs(
             ),
         )
 
-        outputs["eps_sweep_max_cluster_size"] = report_dir / "eps_sweep_max_cluster_size.svg"
+        outputs["eps_sweep_max_cluster_size"] = (
+            report_dir / "eps_sweep_max_cluster_size.svg"
+        )
         _write_text(
             outputs["eps_sweep_max_cluster_size"],
             _svg_line_chart(
@@ -419,7 +450,15 @@ def write_graphs(
         outputs["eps_sweep_csv"] = report_dir / "eps_sweep.csv"
         with outputs["eps_sweep_csv"].open("w", newline="", encoding="utf-8") as f:
             w = csv.writer(f)
-            w.writerow(["eps", "raw_count", "distinct_count", "noise_rate", "max_cluster_size"])
+            w.writerow(
+                [
+                    "eps",
+                    "raw_count",
+                    "distinct_count",
+                    "noise_rate",
+                    "max_cluster_size",
+                ]
+            )
             for r in sweep:
                 w.writerow(
                     [
